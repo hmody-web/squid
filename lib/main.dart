@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // إخفاء شريط الحالة وأشرطة التنقل لتجربة ملء الشاشة
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
   // قفل الاتجاه عمودياً فقط (غيّر إلى landscape إذا أردت)

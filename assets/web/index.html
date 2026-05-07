@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0e62ad">
+<meta charset="UTF-8">
+<title> Squid Jump </title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+<style>
+@font-face {
+    font-family: 'Tajawal';
+    src: url('./fonts/Tajawal.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+    body {
+        margin: 0;
+        padding: 0;
+        background: #0e62ad;
+        overflow: hidden;
+        font-family: Tajawal;
+        transition: all 0.3s ease;
+    }
+    html {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    #player-sray {
+        display: none;
+        position: absolute;
+        width: 30px;
+        height: 50px;
+        image-rendering: pixelated;
+        -webkit-image-rendering: pixelated;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(70px + 50px);
+        filter: drop-shadow(0 0 8px #c9245b);
+    }
+    canvas {
+        display: block;
+        margin: 0 auto;
+    }
+    #game-info {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #ff2e74;
+        font-size: 20px;
+        text-shadow: 0 0 5px #000000, 0 0 10px #ff2e74;
+        z-index: 1;
+        text-align: center;
+        line-height: 1.5;
+    }
+    #game-over {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #f00;
+        font-size: 23px;
+        text-shadow: 0 0 10px #f00, 0 0 20px #f00;
+        text-align: center;
+        z-index: 1;
+    }
+    #start-screen {
+        position: absolute;
+        top: 54%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ff2e74;
+        font-size: 25px;
+        text-align: center;
+        text-shadow: 0 0 10px #ff2e74, 0 0 20px #ff2e74;
+        z-index: 1;
+    }
+    #pause-menu {
+        display: none;
+        position: absolute;
+        background: radial-gradient(#66162fa3, #ff2e74);
+        padding: 20px;
+        width: -webkit-fill-available;
+        height: -webkit-fill-available;
+        text-align: center;
+        color: #ffffff;
+        border: 2px solid #ff2e74;
+        z-index: 1000;
+        opacity: 0;
+        transform: scale(1.7);
+        transition: all 0.3s ease-in-out;
+    }
+    #start-screen:after {
+    content: '';
+    background: url(./img2/ico.png);
+    box-shadow: inset 0px 0px 0px 200000px #081731eb;
+    width: 1000000%;
+    height: 100000000%;
+    top: -300pc;
+    left: -300pc;
+    position: fixed;
+    z-index: -1;
+    background-size: 100px;
+}
+#game-over:before {
+    content: '';
+    background: url(./img2/pborken.png);
+    background-size: cover;
+    width: 48px;
+    height: 80px;
+    position: absolute;
+    margin-top: -60px;
+    margin-left: -20px;
+}
+    #pause-menu.active {
+        opacity: 1;
+        transform: scale(1);
+    }
+    #start-screen button {
+        padding: 6px 9px;
+        background: #ff2e74;
+        border: none;
+        color: #c5aed9;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 10px;
+        position: relative;
+        top: -9px;
+        transition: all 0.3s ease;
+    }
+    #start-screen button:hover {
+        background: #157e6b;
+        color: #ff2e74;
+    }
+    .p1 {
+        color: #ffda98;
+        text-shadow: 2px 1px 0px #ff2e74;
+        border-bottom: 3px solid;
+        padding-bottom: 12px;
+        border-radius: 5px;
+        direction: rtl;
+    }
+    .neon-slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 15px;
+        border-radius: 5px;
+        background: #333;
+        outline: none;
+        opacity: 0.7;
+        display: none;
+
+    }
+    .neon-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: #ff2e74;
+        cursor: pointer;
+        box-shadow: 0 0 10px #ff2e74, 0 0 20px #ff2e74;
+
+    }
+    .txtsound {
+        font-size: 17px;
+        color: #ff2e74;
+        text-shadow: 0 0 17px #ff2e74;
+        font-weight: bold;
+        display: none;
+    }
+    .active option {
+        background: #252529;
+        font-size: 18px;
+        width: -webkit-fill-available;
+        padding: 10px 0px;
+        color: #ff2e74;
+        cursor: pointer;
+        border-radius: 5px;
+        list-style: none;
+        margin: 13px 13px;
+        transition: all 0.2s ease;
+    }
+    #pause-menu h2, option {
+        position: relative;
+        top: 25%;
+    }
+    #start-screen:before {
+    content: '';
+    width: 80px;
+    height: 80px;
+    background: url(./img2/ico.png);
+    background-size: cover;
+    position: absolute;
+    border-radius: 13px;
+    box-shadow: 0px 0px 14px #4a90e261;
+    margin-top: -6pc;
+    margin-left: -42px;
+    border: 3px solid #0c1919;
+    box-shadow: 0 0 9px #0000004d;
+}
+</style>
+</head>
+<body id="body">
+
+    <div id="start-screen">
+        <p class="p1">لعبة Squid Jump</p>
+        <p>اضغط على أي مفتاح أو انقر على الشاشة لبدء اللعبة</p>
+    </div>
+
+    <list id="pause-menu">
+        <h2>استئناف اللعبة</h2>
+        <option>النتيجة الحالية: <span id="pause-current-score">0</span></option>
+        <option>أعلى نتيجة: <span id="pause-high-score">0</span></option>
+        <option class="resumeGame" onclick="resumeGame()">مواصلة اللعب</option>
+    </list>
+
+    <div id="game-info" style="display: none;">
+        Score: <span id="score">0</span>
+        <br>
+        High Score: <span id="high-score">0</span>
+    </div>
+    <div id="game-over">
+        <div class="redbg"></div>
+        <p>! لقد خسرت</p>
+        <p> Game Over</p>
+        <label class="txtsound" for="volumeControl">مستوى الصوت:</label>
+        <input type="range" id="volumeControl" min="0" max="100" value="100" class="neon-slider">
+    </div>
+
+    <img id="player-sray" src="./img2/p.gif" alt="Player">
+    <canvas id="gameCanvas" style="display: none;"></canvas>
+
+<script>
+
+    // =============================================
+    // HIGH SCORE - يعمل بدون localStorage عبر Flutter Channel
+    // أو يستخدم localStorage إذا كان متاحاً
+    // =============================================
+    function saveHighScore(val) {
+        try {
+            localStorage.setItem('highScore', val);
+        } catch(e) {}
+        // إرسال النتيجة إلى Flutter إذا كان الـ channel متاحاً
+        try {
+            if (window.FlutterChannel) {
+                window.FlutterChannel.postMessage('saveHighScore:' + val);
+            }
+        } catch(e) {}
+    }
+
+    function loadHighScore() {
+        try {
+            return localStorage.getItem('highScore') || 0;
+        } catch(e) {
+            return 0;
+        }
+    }
+
+    // Flutter يمكنه تمرير النتيجة العالية عبر هذه الدالة
+    function setHighScoreFromFlutter(val) {
+        highScore = val;
+        document.getElementById('high-score').textContent = highScore;
+    }
+
+    // =============================================
+    // إعداد Canvas واللاعب
+    // =============================================
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startScreen = document.getElementById('start-screen');
+    const gameInfo = document.getElementById('game-info');
+    const gameOverScreen = document.getElementById('game-over');
+
+    let isPaused = false;
+    let button9Pressed = false;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const groundHeight = 70;
+    const player = {
+        x: 5,
+        y: canvas.height - 100 - groundHeight,
+        width: 30,
+        height: 50,
+        color: 'red',
+        dy: 100,
+        gravity: 0.8,
+        jumpStrength: -15,
+        onGround: true,
+        rotation: 0,
+        image: document.getElementById('player-sray')
+    };
+
+    const obstacles = [];
+    let score = 0;
+    let gameSpeed = 5;
+    let gameRunning = true;
+    let initialSpeed = 5;
+
+    // =============================================
+    // الصوتيات
+    // =============================================
+    const backgroundMusic = new Audio('./img2/squidgame');
+    backgroundMusic.loop = true;
+    const loseSound = new Audio('./img2/lose.wav');
+    const jumpSound = new Audio('./img2/jump.mp3');
+
+    const volumeControl = document.getElementById('volumeControl');
+    volumeControl.addEventListener('input', (e) => {
+        const volume = e.target.value / 100;
+        backgroundMusic.volume = volume;
+        loseSound.volume = volume;
+        jumpSound.volume = volume;
+    });
+
+    // =============================================
+    // النتيجة العالية
+    // =============================================
+    let highScore = loadHighScore();
+    document.getElementById('high-score').textContent = highScore;
+
+    // =============================================
+    // دوال اللعبة
+    // =============================================
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        player.y = canvas.height - player.height - groundHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    function createObstacle() {
+        const height = Math.random() * 50 + 20;
+        const neonColors = ['#76b0bd', '#24bb69', '#ef8436'];
+        const obstacle = {
+            x: canvas.width + 100,
+            y: canvas.height - height - groundHeight,
+            width: 50,
+            height,
+            color: neonColors[Math.floor(Math.random() * neonColors.length)]
+        };
+        obstacles.push(obstacle);
+    }
+
+    function updatePlayer() {
+        if (player.dy < 0) {
+            player.rotation = -30;
+        } else if (player.dy > 0) {
+            player.rotation = +20;
+        } else {
+            player.rotation = 0;
+        }
+        if (!player.onGround) {
+            player.dy += player.gravity;
+            player.y += player.dy;
+        }
+        if (player.y + player.height >= canvas.height - groundHeight) {
+            player.y = canvas.height - player.height - groundHeight;
+            player.onGround = true;
+            player.dy = 0;
+        }
+    }
+
+    function updateObstacles() {
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            const obstacle = obstacles[i];
+            obstacle.x -= gameSpeed;
+            if (obstacle.x + obstacle.width < 0) {
+                obstacles.splice(i, 1);
+                score++;
+                document.getElementById('score').textContent = score;
+            }
+        }
+
+        if (score > 20) {
+            gameSpeed = initialSpeed + 1.3;
+            if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width - 300) {
+                createObstacle();
+            }
+        }
+        if (score > 50) {
+            gameSpeed = initialSpeed + 2;
+            if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width - 400) {
+                createObstacle();
+            }
+        }
+        if (score > 100) {
+            cloudImage.src = './img2/stars.png';
+            body.style.background = '#270a05';
+            if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width - 470) {
+                createObstacle();
+            }
+        }
+        if (score > 105) {
+            gameSpeed = initialSpeed + 4;
+        } else {
+            if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width - 200) {
+                createObstacle();
+            }
+        }
+        if (score > 155) {
+            cloudImage.src = './img2/cloud.png';
+            body.style.background = '#cddee6';
+            gameSpeed = initialSpeed + 6;
+            if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < canvas.width - 550) {
+                createObstacle();
+            }
+        }
+    }
+
+    function detectCollision() {
+        for (const obstacle of obstacles) {
+            if (
+                player.x < obstacle.x + obstacle.width &&
+                player.x + player.width > obstacle.x &&
+                player.y < obstacle.y + obstacle.height &&
+                player.y + player.height > obstacle.y
+            ) {
+                endGame();
+            }
+        }
+    }
+
+    function drawObstacles() {
+        for (const obstacle of obstacles) {
+            if (score > 100) {
+                ctx.fillStyle = '#270a05';
+            } else {
+                ctx.fillStyle = obstacle.color;
+            }
+            if (score > 150) {
+                ctx.fillStyle = obstacle.color;
+            }
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = obstacle.color;
+            ctx.beginPath();
+            ctx.moveTo(obstacle.x + 10, obstacle.y);
+            ctx.lineTo(obstacle.x + obstacle.width - 10, obstacle.y);
+            ctx.quadraticCurveTo(obstacle.x + obstacle.width, obstacle.y, obstacle.x + obstacle.width, obstacle.y + 10);
+            ctx.lineTo(obstacle.x + obstacle.width, obstacle.y + obstacle.height);
+            ctx.lineTo(obstacle.x, obstacle.y + obstacle.height);
+            ctx.lineTo(obstacle.x, obstacle.y + 10);
+            ctx.quadraticCurveTo(obstacle.x, obstacle.y, obstacle.x + 10, obstacle.y);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+    }
+
+    function drawPlayer() {
+        const sprite = document.getElementById('player-sray');
+        sprite.style.display = 'block';
+        sprite.style.left = '50%';
+        sprite.style.top = player.y + 'px';
+        sprite.style.transform = `translateX(-50%) rotate(${player.rotation}deg)`;
+        sprite.style.transition = 'transform 0.3s ease';
+    }
+
+    function drawGround() {
+        if (score > 100) {
+            ctx.fillStyle = '#e24a4a';
+        } else {
+            ctx.fillStyle = '#edd096';
+        }
+        if (score > 150) {
+            ctx.fillStyle = '#edd096';
+        }
+        ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
+    }
+
+    function startGame() {
+        startScreen.style.display = 'none';
+        canvas.style.display = 'block';
+        gameInfo.style.display = 'block';
+        gameInfo.style.top = '45%';
+        gameSpeed = 5;
+        player.x = canvas.width / 2 - player.width / 2;
+        player.y = canvas.height - player.height - groundHeight;
+        backgroundMusic.play().catch(() => {});
+        gameLoop();
+    }
+
+    function endGame() {
+        gameRunning = false;
+        if (score > highScore) {
+            highScore = score;
+            saveHighScore(highScore);
+            document.getElementById('high-score').textContent = highScore;
+        }
+        gameOverScreen.style.display = 'block';
+        canvas.style.filter = 'blur(7px)';
+        const scoreElement = document.getElementById('game-info');
+        scoreElement.style.marginTop = '10pc';
+        backgroundMusic.pause();
+        backgroundMusic.currentTime = 0;
+        loseSound.play().catch(() => {});
+    }
+
+    function restartGame() {
+        gameOverScreen.style.display = 'none';
+        score = 0;
+        document.getElementById('score').textContent = score;
+        player.x = canvas.width / 2 - player.width / 2;
+        player.y = canvas.height - 0 - groundHeight;
+        player.dy = 0;
+        obstacles.length = 0;
+        gameSpeed = initialSpeed;
+        gameRunning = true;
+        canvas.style.filter = 'none';
+        const scoreElement = document.getElementById('game-info');
+        scoreElement.style.marginTop = '0pc';
+        backgroundMusic.play().catch(() => {});
+        cloudImage.src = './img2/cloud.png';
+        body.style.background = '#0e62ad';
+        gameLoop();
+    }
+
+    function pauseGame() {
+        if (gameOverScreen.style.display === 'none') {
+            isPaused = true;
+            gameRunning = false;
+            const pauseMenu = document.getElementById('pause-menu');
+            pauseMenu.style.display = 'block';
+            setTimeout(() => pauseMenu.classList.add('active'), 10);
+            document.getElementById('pause-current-score').textContent = score;
+            document.getElementById('pause-high-score').textContent = highScore;
+            canvas.style.filter = 'blur(5px)';
+            backgroundMusic.pause();
+        }
+    }
+
+    function resumeGame() {
+        const pauseMenu = document.getElementById('pause-menu');
+        pauseMenu.classList.remove('active');
+        setTimeout(() => {
+            pauseMenu.style.display = 'none';
+            isPaused = false;
+            gameRunning = true;
+            canvas.style.filter = 'none';
+            backgroundMusic.play().catch(() => {});
+            gameLoop();
+        }, 300);
+    }
+
+    function togglePause() {
+        if (gameOverScreen.style.display === 'none') {
+            if (document.getElementById('pause-menu').style.display === 'block') {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        }
+    }
+
+    // =============================================
+    // الغيوم
+    // =============================================
+    const clouds = [];
+    const cloudImage = new Image();
+    cloudImage.src = './img2/cloud.png';
+
+    function createCloud() {
+        const cloud = {
+            x: Math.random() * canvas.width,
+            y: Math.random() * (canvas.height / 2),
+            width: 60 + Math.random() * 50,
+            height: 60 + Math.random() * 20,
+            speed: Math.random() * 0.5 + 0.5,
+            direction: Math.random() < 0.5 ? -1 : 1
+        };
+        clouds.push(cloud);
+    }
+
+    function updateClouds() {
+        for (let i = clouds.length - 1; i >= 0; i--) {
+            const cloud = clouds[i];
+            cloud.x += cloud.speed * cloud.direction;
+            if (cloud.x > canvas.width) {
+                cloud.x = -cloud.width;
+            } else if (cloud.x + cloud.width < 0) {
+                cloud.x = canvas.width;
+            }
+        }
+        while (clouds.length < 15) {
+            createCloud();
+        }
+    }
+
+    function drawClouds() {
+        ctx.globalAlpha = 0.5;
+        for (const cloud of clouds) {
+            ctx.drawImage(cloudImage, cloud.x, cloud.y, cloud.width, cloud.height);
+        }
+        ctx.globalAlpha = 1.0;
+    }
+
+    function gameLoop() {
+        if (!gameRunning || isPaused) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        updatePlayer();
+        updateObstacles();
+        updateClouds();
+        detectCollision();
+        drawGround();
+        drawPlayer();
+        drawObstacles();
+        drawClouds();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // =============================================
+    // Gamepad
+    // =============================================
+    let button8Pressed = false;
+    let button6Pressed = false;
+    let button7Pressed = false;
+
+    function checkGamepadForStart() {
+        const gamepads = navigator.getGamepads();
+        const gamepad = gamepads[0];
+        if (gamepad) {
+            if (gamepad.buttons[2].pressed) {
+                if (startScreen.style.display !== 'none') {
+                    startGame();
+                } else if (gameOverScreen.style.display !== 'none') {
+                    restartGame();
+                }
+            }
+        }
+        requestAnimationFrame(checkGamepadForStart);
+    }
+    checkGamepadForStart();
+
+    window.addEventListener("gamepadconnected", (e) => {
+        console.log("يد تحكم متصلة:", e.gamepad);
+        checkGamepadForStart();
+    });
+
+    function checkGamepad() {
+        const gamepads = navigator.getGamepads();
+        const gamepad = gamepads[0];
+        if (gamepad) {
+            if (gamepad.buttons[9].pressed && gameRunning && !button9Pressed && gameOverScreen.style.display === 'none') {
+                if (isPaused) { resumeGame(); } else { pauseGame(); }
+            } else if (!gamepad.buttons[9].pressed) {
+                button9Pressed = false;
+            }
+            if (gamepad.buttons[0].pressed && player.onGround) {
+                player.dy = player.jumpStrength;
+                player.onGround = false;
+                jumpSound.play().catch(() => {});
+            }
+            if (gamepad.buttons[8].pressed && !button8Pressed) {
+                button8Pressed = true;
+                toggleFullScreen();
+            } else if (!gamepad.buttons[8].pressed) {
+                button8Pressed = false;
+            }
+            if (gamepad.buttons[6].pressed && !button6Pressed) {
+                button6Pressed = true;
+                volumeControl.value = Math.max(0, volumeControl.value - 10);
+                volumeControl.dispatchEvent(new Event('input'));
+            } else if (!gamepad.buttons[6].pressed) {
+                button6Pressed = false;
+            }
+            if (gamepad.buttons[7].pressed && !button7Pressed) {
+                button7Pressed = true;
+                volumeControl.value = Math.min(100, parseInt(volumeControl.value) + 10);
+                volumeControl.dispatchEvent(new Event('input'));
+            } else if (!gamepad.buttons[7].pressed) {
+                button7Pressed = false;
+            }
+        }
+        requestAnimationFrame(checkGamepad);
+    }
+    checkGamepad();
+
+    // =============================================
+    // أحداث لوحة المفاتيح
+    // =============================================
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (gameRunning && gameOverScreen.style.display === 'none') {
+                if (isPaused) { resumeGame(); } else { pauseGame(); }
+            }
+            return;
+        }
+        if (startScreen.style.display !== 'none') {
+            startGame();
+            return;
+        }
+        if (gameOverScreen.style.display !== 'none') {
+            restartGame();
+            return;
+        }
+        if (e.code === 'ArrowUp' && player.onGround) {
+            player.dy = player.jumpStrength;
+            player.onGround = false;
+            jumpSound.play().catch(() => {});
+        }
+    });
+
+    // =============================================
+    // أحداث النقر واللمس
+    // =============================================
+    document.addEventListener('click', () => {
+        if (startScreen.style.display !== 'none') {
+            gameOverScreen.style.display = 'none';
+            startGame();
+            return;
+        }
+        if (gameOverScreen.style.display !== 'none') {
+            restartGame();
+            return;
+        }
+        if (player.onGround) {
+            player.dy = player.jumpStrength;
+            player.onGround = false;
+        }
+    });
+
+    document.addEventListener('touchstart', function (e) {
+        if (startScreen.style.display !== 'none') {
+            e.preventDefault();
+            startGame();
+            return;
+        }
+        if (gameOverScreen.style.display !== 'none' && !gameRunning) {
+            e.preventDefault();
+            restartGame();
+            return;
+        }
+        if (gameRunning && player.onGround) {
+            e.preventDefault();
+            player.dy = player.jumpStrength;
+            player.onGround = false;
+            jumpSound.play().catch(() => {});
+        }
+    }, { passive: false });
+
+    // =============================================
+    // قائمة الإيقاف المؤقت - التنقل بالأسهم
+    // =============================================
+    const options = document.querySelectorAll('#pause-menu option');
+    let selectedOptionIndex = 0;
+
+    function updateSelectedOption() {
+        options.forEach((option, index) => {
+            option.style.background = index === selectedOptionIndex ? '#edd096' : '';
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const pauseMenu = document.getElementById('pause-menu');
+        if (pauseMenu.style.display === 'block') {
+            if (e.key === 'ArrowUp') {
+                selectedOptionIndex = (selectedOptionIndex - 1 + options.length) % options.length;
+                updateSelectedOption();
+            } else if (e.key === 'ArrowDown') {
+                selectedOptionIndex = (selectedOptionIndex + 1) % options.length;
+                updateSelectedOption();
+            } else if (e.key === 'Enter') {
+                options[selectedOptionIndex].click();
+            }
+        }
+    });
+
+</script>
+</body>
+</html>
